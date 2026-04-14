@@ -308,14 +308,14 @@ tbody td { padding: 9px 11px; vertical-align: middle; }
       </div>
     </div>
     <div class="login-field">
-      <label>Nome utente</label>
-      <input type="text" id="l-user" placeholder="es. mario.rossi" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+      <label>Email</label>
+      <input type="email" id="l-user" placeholder="es. mario@gmail.com" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="login-field">
       <label>Password</label>
       <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="login-btn" id="login-btn" onclick="doLogin()">Accedi</button>
+    <div style="display:flex;align-items:center;gap:8px;margin:10px 0 4px"><input type="checkbox" id="l-remember" checked style="width:15px;height:15px;cursor:pointer;accent-color:var(--ink)"><label for="l-remember" style="font-size:13px;color:var(--steel);cursor:pointer">Resta collegato</label></div><button class="login-btn" id="login-btn" onclick="doLogin()">Accedi</button>
     <div class="login-err" id="login-err"></div>
   </div>
 </div>
@@ -545,13 +545,14 @@ async function doLogin() {
   const pass = document.getElementById('l-pass').value;
   const err = document.getElementById('login-err');
   const btn = document.getElementById('login-btn');
-  if(!user||!pass){err.textContent='Inserisci nome utente e password.';return;}
+  if(!user||!pass){err.textContent='Inserisci email e password.';return;}
+  const remember = document.getElementById('l-remember').checked;
   err.textContent='';
   btn.innerHTML='<div class="spinner"></div>';
   btn.disabled=true;
   // Costruisce email da username
-  const email = user.includes('@') ? user : user+'@polizialocale.it';
-  const {data, error} = await sb.auth.signInWithPassword({email, password: pass});
+  const email = user;
+  const {data, error} = await sb.auth.signInWithPassword({email, password: pass, options:{persistSession: remember}});
   if(error){
     err.textContent='Credenziali non valide. Riprova.';
     btn.innerHTML='Accedi'; btn.disabled=false; return;
@@ -890,6 +891,7 @@ document.getElementById('mbg').addEventListener('click',e=>{if(e.target===docume
     const uname=session.user.email.split('@')[0];
     const parts=uname.split('.');
     currentUserName=parts.map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
+
     await initApp();
   } else {
     document.getElementById('login-screen').style.display='flex';
